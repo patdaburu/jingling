@@ -1,0 +1,10 @@
+{
+  "name": "jingling",
+  "version": "0.0.1",
+  "description": "精灵代理",
+  "author": "Pat Daburu <pat@daburu.net>",
+  "main": "app.js",
+  "dependencies": {
+    "should": "^8.3.1"
+  }
+}
