@@ -5,6 +5,11 @@
   "author": "Pat Daburu <pat@daburu.net>",
   "main": "app.js",
   "dependencies": {
+    "express": "^4.13.4",
     "should": "^8.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patdaburu/jingling.git"
   }
 }
