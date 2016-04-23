@@ -5,6 +5,7 @@
   "author": "Pat Daburu <pat@daburu.net>",
   "main": "app.js",
   "dependencies": {
+    "connect-timeout": "^1.7.0",
     "express": "^4.13.4",
     "should": "^8.3.1"
   },
