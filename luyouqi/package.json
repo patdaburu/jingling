@@ -1,0 +1,12 @@
+{
+  "name": "luyouqi",
+  "version": "0.0.1",
+  "description": "路由器",
+  "author": "Pat Daburu",
+  "main": "index.js",
+  "license": "AML",
+  "dependencies": {
+    "express": "^4.13.4",
+    "underscore": "^1.8.3"
+  }
+}

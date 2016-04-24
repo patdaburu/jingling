@@ -4,6 +4,7 @@
   "description": "精灵代理",
   "author": "Pat Daburu <pat@daburu.net>",
   "main": "app.js",
+  "license": "AML",
   "dependencies": {
     "connect-timeout": "^1.7.0",
     "express": "^4.13.4",

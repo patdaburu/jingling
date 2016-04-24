@@ -12,6 +12,12 @@
 var express = require('express');
 var timeout = require('connect-timeout');
 
+//var ServiceRouter = require('./luyouqi/ServiceRouter');
+//var GeocodingServiceRouter = require('./luyouqi/GeocodingServiceRouter');
+var luyouqi = require('./luyouqi');
+
+var geocodeRouter = require('./luyouqi/geocode/geocode-router');
+
 // This is just the basic test code.  Start with connect()!
 /*var http = require('http');
 http.createServer(function (req, res) {
@@ -32,10 +38,11 @@ http.createServer(function (req, res) {
  });
  });*/
 
-var app = express();
+
+//var app = express();
 
 /** You can use app.param() to load the parameter value for everybody!!! */
-app.param('username', function (req, res, next, username) {
+/*app.param('username', function (req, res, next, username) {
     req.user = {userId: username};
     next();
 });
@@ -49,7 +56,7 @@ app.route(/^\/([0-9]+)$/i) // We capture the number...
         res.send("That's the number " + req.params[0]); // ...and it becomes params[0]
     });
 
-app.route('/*') // You can also use a REGEX!!!
+ app.route('/!*') // You can also use a REGEX!!!
     .all(function (req, res, next) {
         res.write('all\n');
         next();
@@ -59,7 +66,24 @@ app.route('/*') // You can also use a REGEX!!!
     })
     .post(function (req, res, next) {
         res.end('thank you for POSTing');
-    });
+ });*/
+
+/*var serviceRouter = new ServiceRouter();
+ serviceRouter.routeFor(app);
+ console.log(serviceRouter.expressRouter);*/
+
+//var geocodingRouter = new GeocodingServiceRouter(app, '/', true);
+/*var geocodingRouter = new GeocodingServiceRouter({
+ app: app,
+ path: '/geocode'
+ });
+ console.log(geocodingRouter._name);*/
+
+//console.log(luyouqi());
+//var gcrouter = luyouqi.geocodeRouter();
+//app.use('/geocode', gcrouter);
+
+var app = luyouqi();
 
 app.listen(1337);
 
