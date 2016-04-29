@@ -1,7 +1,6 @@
 /**
  * Proxy
- * @module luyouqi/ProxyRouter
- * @see module:luyouqi/ProxyRouter
+ * @module luyouqi/Proxy
  *
  * Created by patdaburu on 4/23/2016.
  */
@@ -9,6 +8,8 @@
 
 var _ = require('underscore');
 var express = require('express');
+var inherits = require('util').inherits;
+var EventEmitter = require('events').EventEmitter;
 var MapServerProxyRouter = require('./MapServerProxyRouter');
 var RestInfoProxyRouter = require('./RestInfoProxyRouter');
 var Forwarder = require('./Forwarder');
@@ -52,6 +53,14 @@ function Proxy(options) { // TODO: Take single object parameter!
      * this._app.set('case sensitive routing', true);
      */
 
+    /**
+     * This is an array of all the proxy routers used by this proxy.
+     * @readonly
+     * @type {Array}
+     * @see ProxyRouter
+     */
+    this.proxyRouters = [];
+
     // Set up the proxy by adding the standard routers.
     this.setup();
 
@@ -62,17 +71,13 @@ function Proxy(options) { // TODO: Take single object parameter!
     }
 }
 
+inherits(Proxy, EventEmitter);
+
 /**
  * Prepare the proxy to handle requests.
  * @see {@link startup}
  */
 Proxy.prototype.setup = function () {
-
-    /**
-     * Note to the future:  If you're debugging through Fiddler, uncomment the lines below.
-     */
-//    allowTlsUnauthorized();
-//    this.forwarder.proxy = "http://127.0.0.1:8888";
 
     // Set up the MapServer proxy.
     var mapServerProxyRouter = new MapServerProxyRouter({timeout: this.connectTimeout, forwarder: this.forwarder});
@@ -80,6 +85,7 @@ Proxy.prototype.setup = function () {
         '/ArcGIS/rest/services/World_Street_Map/',
         connectTimeout(this.connectTimeout),
         mapServerProxyRouter.getRouter());
+    this.proxyRouters.push(mapServerProxyRouter);
 
     // Set up the ArcGIS Server Info proxy.
     var restInfoProxyRouter = new RestInfoProxyRouter({timeout: this.connectTimeout, forwarder: this.forwarder});
@@ -88,7 +94,7 @@ Proxy.prototype.setup = function () {
         connectTimeout(this.connectTimeout),
         restInfoProxyRouter.getRouter()
     );
-
+    this.proxyRouters.push(restInfoProxyRouter);
 }
 
 /**
@@ -100,13 +106,40 @@ Proxy.prototype.startup = function () {
     this._server = this._app.listen(this.port);
 
     // Whenever the server makes a new connection...
-    this._server.on(
+    var onServerConnection = this._server.on(
         'connection',
         _.bind(function (socket) {
             // TODO: Log or otherwise meter this.
             // ...set the 'keep-alive' duration on the socket.
             socket.setTimeout(this.keepAlive);
+            // When the proxy is destroyed...
+            this.once('destroy', function () {
+                // ...we need to destroy the socket.
+                socket.destroy();
+            });
         }, this));
+    // Unhook this event handler when the proxy is destroyed.
+    this.once('destroy', function () {
+        onServerConnection.remove();
+    });
+}
+
+/**
+ * Destroy the object.
+ */
+Proxy.prototype.destroy = function () {
+    // Let everybody know this is happening.
+    this.emit('destroy');
+    // Null out the large object references.
+    this._app = null;
+    // Destroy all of the proxy routers.
+    _.each(this.proxyRouters, function (proxyRouter) {
+        proxyRouter.destroy();
+    });
+    // Null out the reference to the server.
+    this._server = null;
+    // Remove all the listeners.
+    this.removeAllListeners();
 }
 
 module.exports = Proxy;

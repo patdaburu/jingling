@@ -8,7 +8,9 @@
 "use strict";
 
 var _ = require('underscore');
+var EventEmitter = require('events').EventEmitter;
 var express = require('express');
+var inherits = require('util').inherits;
 var Forwarder = require('./Forwarder');
 var url = require('url');
 
@@ -118,6 +120,8 @@ function ProxyRouter(options) {
     }
 }
 
+inherits(ProxyRouter, EventEmitter);
+
 /**
  * Get this proxy router's Express/Connect router.
  * @returns {Router}
@@ -193,6 +197,16 @@ ProxyRouter.prototype.onRequest = function (req, res, next) {
         // When the forwarder is finished, we need to move on to the next handler.
         next();
     });
+}
+
+/**
+ * Destroy the object.
+ */
+ProxyRouter.prototype.destroy = function () {
+    // Let everybody know this is happening.
+    this.emit('destroy');
+    // Remove all the listeners.
+    this.removeAllListeners();
 }
 
 module.exports = ProxyRouter;

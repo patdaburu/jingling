@@ -12,7 +12,13 @@ process.on('uncaughtException', function (err) {
     console.log('Caught exception: ', err);
     console.log('Stack:', err.stack);
     process.exit(1);
-})
+});
+
+/**
+ * Note to the future:  If you're debugging through Fiddler, uncomment the lines below.
+ */
+//    allowTlsUnauthorized();
+//    this.forwarder.proxy = "http://127.0.0.1:8888";
 
 
 // Create the proxy.
@@ -32,9 +38,9 @@ process.on('SIGINT', function () {
     process.exit(2);
 });
 
-process.on('SIGKILL', function () {
-    process.exit(1);
-});
+//process.on('SIGKILL', function () {
+//   process.exit(1);
+//});
 
 process.on('SIGTERM', function () {
     // This is the normal way to politely ask the program to terminate.
