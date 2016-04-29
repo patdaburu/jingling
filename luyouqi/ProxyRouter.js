@@ -24,20 +24,20 @@ var ServiceTypes = {
      */
     MAP_SERVER: 'MapServer',
     /**
-     * Incomplete
+     * FeatureServerNotYetImplemented
      * {@link http://resources.arcgis.com/en/help/main/10.2/index.html#//0154000002w8000000|What is a feature service?}
      */
-    FEATURE_SERVER: 'Incomplete',
-
-
-    REST_INFO: 'info'
+    FEATURE_SERVER: 'FeatureServerNotYetImplemented',
+    /**
+     * Info - ArcGIS Server Information
+     */
+    REST_INFO: 'Info'
 }
 
 /**
  * @param {Object} options - These are the options that define the routing behavior.
  * @param {string} options.serviceUrl - This is the URL of the service to which requests are forwarded.
  * @param {ServiceTypes} options.serviceType - This is the type of the service to which requests are forwarded.
- * @param {number} [options.defaultPath=/] - This is the path on which the default router is mounted.
  * @param {number} [options.timeout=10*1000] - How long should the proxy wait before timing out a connection?
  * @param {function({}, function(error, response, body)} [options.request=require('request')] - This is the function used to make HTTP(S) requests.
  * @param {Forwarder} [options.forwarder] - This is the forwarder that handles the actual forwarding of requests.
@@ -50,7 +50,6 @@ function ProxyRouter(options) {
     _.extend(this, _.extend({
         serviceUrl: null,
         serviceType: null,
-        defaultPath: '/',
         timeout: 10 * 1000,
         forwarder: new Forwarder(),
         methods: ['all']
@@ -87,11 +86,12 @@ function ProxyRouter(options) {
     this._re.subPath = new RegExp('\\/' + this.serviceType + '\\/?(.*)\\??', 'i'); // TODO: Document this regular expression IN DETAIL!!!
 
     /**
-     * This is the proxy router's default route.
+     * This is the proxy router's default route path.
      * @type {Route}
      * @private
      */
-    this._defaultRoute = this.addRoute(this.defaultPath);
+    this._defaultRoutePath = "/" + this.serviceType + "/?*";
+    this._defaultRoute = this.addRoute(this._defaultRoutePath);
 
     // Let's make sure we have a service type.
     if (!this.serviceType) {
@@ -111,7 +111,6 @@ function ProxyRouter(options) {
         _.each(['get', 'post', 'put', 'delete', 'all'], function (method) {
             // If the methods property contains this HTTP method...
             if (_.intersection(this.methods, [method]).length > 0) {
-                console.log("I can " + method + "!");
                 // ...add the default handler for this HTTP method to the default route.
                 this._defaultRoute[method](_.bind(this.onRequest, this));
             }

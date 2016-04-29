@@ -29,24 +29,21 @@ var extendResHeaders = function (destination, source) {
     for (var i = 0; i < source.rawHeaders.length; i = i + 2) {
         // Don't copy the 'Content-Length' header.
         if (source.rawHeaders[i].toLowerCase() == 'content-length') {  // If these checks grow, we should work out
-            continue;                                              // a more efficient way handle them.
+            continue;                                                  // a more efficient way handle them.
         }
         // TODO: For *very* verbose logging, we should note all of headers we're copying over.
-//        console.log(source.rawHeaders[i] + " = " + source.rawHeaders[i+1]);
         destination.set(source.rawHeaders[i], source.rawHeaders[i + 1]);
     }
     // If we need to add additional headers, this would be the place.
     // destination.set('Another-Header', 'Header Value Goes Here!');
 
-    console.log(JSON.stringify(source.headers));
-    destination.set('Connection', 'close'); // TODO: This is for testing and is probably not correct!
-    console.log(JSON.stringify(destination._headers));
-
+    // Return the destination headers to the caller (in case they're chaining these calls).
     return destination;
 }
 
 /**
- *
+ * This is the name of a property on the process.env object that controls Node modules' behavior when making HTTPS
+ * requests to servers with self-signed (or otherwise unauthorized) certificates.
  * @type {string}
  */
 var NODE_TLS_REJECT_UNAUTHORIZED = 'NODE_TLS_REJECT_UNAUTHORIZED';
@@ -125,7 +122,7 @@ Forwarder.prototype.forward = function (req, to, callback, resStream, options) {
     // Replace the 'host' header (which would refer to this machine) with the hostname to which we're forwarding the
     // request.
     headers.host = url.parse(to).hostname;
-    // Get the querystring parameters from the original request so that we can pass them on.
+    // Get the query string parameters from the original request so that we can pass them on.
     var qs = req.query;
     // Create the request() options.
     var _options = {
