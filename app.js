@@ -16,7 +16,6 @@ var timeout = require('connect-timeout');
 //var GeocodingServiceRouter = require('./luyouqi/GeocodingServiceRouter');
 var luyouqi = require('./luyouqi');
 
-var geocodeRouter = require('./luyouqi/geocode/geocode-router');
 
 // This is just the basic test code.  Start with connect()!
 /*var http = require('http');
@@ -83,8 +82,18 @@ app.route(/^\/([0-9]+)$/i) // We capture the number...
 //var gcrouter = luyouqi.geocodeRouter();
 //app.use('/geocode', gcrouter);
 
-var app = luyouqi();
 
-app.listen(1337);
+//var app = luyouqi();
+//app.listen(1337);
 
-console.log('Server running at http://127.0.0.1:1337');
+
+//var GeocodingProxyRouter = require('./luyouqi/GeocodingProxyRouter');
+//var geocodingProxyRouter = new GeocodingProxyRouter();
+//var app = express().use('/', geocodingProxyRouter._router).listen(1337);
+
+var Proxy = require('./luyouqi/Proxy');
+
+var proxy = new Proxy();
+
+
+console.log('Server running at http://127.0.0.1:' + proxy.port);

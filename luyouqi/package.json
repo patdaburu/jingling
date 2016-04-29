@@ -6,7 +6,10 @@
   "main": "index.js",
   "license": "AML",
   "dependencies": {
+    "connect-timeout": "^1.7.0",
+    "dev-null": "^0.1.1",
     "express": "^4.13.4",
+    "request": "^2.72.0",
     "underscore": "^1.8.3"
   }
 }
