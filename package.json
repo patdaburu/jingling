@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "精灵",
   "author": "Pat Daburu <pat@daburu.net>",
-  "main": "app.js",
+  "main": "index.js",
   "license": "AML",
   "dependencies": {
     "connect-timeout": "^1.7.0",

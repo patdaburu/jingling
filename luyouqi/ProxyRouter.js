@@ -113,8 +113,10 @@ function ProxyRouter(options) {
         _.each(['get', 'post', 'put', 'delete', 'all'], function (method) {
             // If the methods property contains this HTTP method...
             if (_.intersection(this.methods, [method]).length > 0) {
-                // ...add the default handler for this HTTP method to the default route.
-                this._defaultRoute[method](_.bind(this.onRequest, this));
+                // ...figure out what the name for the handler method is based on the method name.
+                var handler = 'on' + method.charAt(0).toUpperCase() + method.substr(1);
+                // Now, add the default handler for this HTTP method to the default route.
+                this._defaultRoute[method](_.bind(this[handler], this));
             }
         }, this);
     }
@@ -197,6 +199,66 @@ ProxyRouter.prototype.onRequest = function (req, res, next) {
         // When the forwarder is finished, we need to move on to the next handler.
         next();
     });
+}
+
+/**
+ * If the proxy router handles all HTTP methods with a common handler, this is the default handler method.  Override
+ * this method to modify the proxy's behavior.  The default behavior is to pass the call to onRequest().
+ * @param {Request} req - This is the incoming request.
+ * @param {Response} res - This is the outgoing response.
+ * @param {function()} next - Call this function to pass control to the next handler.
+ * @see onRequest
+ */
+ProxyRouter.prototype.onAll = function (req, res, next) {
+    this.onRequest(req, res, next);
+}
+
+/**
+ * This is the standard handler for HTTP 'GET' requests.  Override this method to modify the proxy's behavior when
+ * 'GET' requests are handled.  The default behavior is to pass the call to onRequest().
+ * @param {Request} req - This is the incoming request.
+ * @param {Response} res - This is the outgoing response.
+ * @param {function()} next - Call this function to pass control to the next handler.
+ * @see onRequest
+ */
+ProxyRouter.prototype.onGet = function (req, res, next) {
+    this.onRequest(req, res, next);
+}
+
+/**
+ * This is the standard handler for HTTP 'GET' requests.  Override this method to modify the proxy's behavior when
+ * 'GET' requests are handled.  The default behavior is to pass the call to onRequest().
+ * @param {Request} req - This is the incoming request.
+ * @param {Response} res - This is the outgoing response.
+ * @param {function()} next - Call this function to pass control to the next handler.
+ * @see onRequest
+ */
+ProxyRouter.prototype.onPost = function (req, res, next) {
+    this.onRequest(req, res, next);
+}
+
+/**
+ * This is the standard handler for HTTP 'GET' requests.  Override this method to modify the proxy's behavior when
+ * 'GET' requests are handled.  The default behavior is to pass the call to onRequest().
+ * @param {Request} req - This is the incoming request.
+ * @param {Response} res - This is the outgoing response.
+ * @param {function()} next - Call this function to pass control to the next handler.
+ * @see onRequest
+ */
+ProxyRouter.prototype.onPut = function (req, res, next) {
+    this.onRequest(req, res, next);
+}
+
+/**
+ * This is the standard handler for HTTP 'GET' requests.  Override this method to modify the proxy's behavior when
+ * 'GET' requests are handled.  The default behavior is to pass the call to onRequest().
+ * @param {Request} req - This is the incoming request.
+ * @param {Response} res - This is the outgoing reponse.
+ * @param {function()} next - Call this function to pass control to the next handler.
+ * @see onRequest
+ */
+ProxyRouter.prototype.onDelete = function (req, res, next) {
+    this.onRequest(req, res, next);
 }
 
 /**
