@@ -10,6 +10,7 @@ var _ = require('underscore');
 var express = require('express');
 var inherits = require('util').inherits;
 var EventEmitter = require('events').EventEmitter;
+var Logger = require('../log/Logger');
 var MapServerProxyRouter = require('./MapServerProxyRouter');
 var RestInfoProxyRouter = require('./RestInfoProxyRouter');
 var Forwarder = require('./Forwarder');
@@ -31,7 +32,9 @@ var allowTlsUnauthorized = function () {
  * @param {boolean} [options.autoStart=true] - Should the proxy start listening after it's constructed?
  * @param {number}  [options.connectTimeout=10*1000] - This is the time after which connections time out.
  * @param {number}  [options.keepAlive=30*1000] - This is how long a connection socket can remain open.
- * @param {Forwarder} [options.forwarder=undefined] - This is the Forwarder instance used by proxy routers to
+ * @param {Forwarder} [options.forwarder=undefined] - This is the Forwarder instance used by proxy routers to forward
+ *                                                    requests.
+ * @param {Logger} [options.forwarder=undefined] - This is the logger used by the proxy.
  * @constructor
  */
 function Proxy(options) { // TODO: Take single object parameter!
@@ -41,7 +44,8 @@ function Proxy(options) { // TODO: Take single object parameter!
         autoStart: true,
         connectTimeout: (10 * 1000),
         keepAlive: (30 * 1000),
-        forwarder: new Forwarder()
+        forwarder: new Forwarder(),
+        logger: new Logger()
     }, options));
 
     /** This is the Express application that is the basis of this proxy. */
@@ -80,7 +84,11 @@ inherits(Proxy, EventEmitter);
 Proxy.prototype.setup = function () {
 
     // Set up the MapServer proxy.
-    var mapServerProxyRouter = new MapServerProxyRouter({timeout: this.connectTimeout, forwarder: this.forwarder});
+    var mapServerProxyRouter = new MapServerProxyRouter({
+        timeout: this.connectTimeout,
+        forwarder: this.forwarder,
+        logger: this.logger
+    });
     this._app.use(
         '/ArcGIS/rest/services/World_Street_Map/',
         connectTimeout(this.connectTimeout),
@@ -88,7 +96,11 @@ Proxy.prototype.setup = function () {
     this.proxyRouters.push(mapServerProxyRouter);
 
     // Set up the ArcGIS Server Info proxy.
-    var restInfoProxyRouter = new RestInfoProxyRouter({timeout: this.connectTimeout, forwarder: this.forwarder});
+    var restInfoProxyRouter = new RestInfoProxyRouter({
+        timeout: this.connectTimeout,
+        forwarder: this.forwarder,
+        logger: this.logger
+    });
     this._app.use(
         '/ArcGIS/rest/',
         connectTimeout(this.connectTimeout),
@@ -112,11 +124,32 @@ Proxy.prototype.startup = function () {
             // TODO: Log or otherwise meter this.
             // ...set the 'keep-alive' duration on the socket.
             socket.setTimeout(this.keepAlive);
-            // When the proxy is destroyed...
-            this.once('destroy', function () {
-                // ...we need to destroy the socket.
+
+            // We need a callback that will...
+            var onProxyDestroy = function () {
+                // Log...
+                this.logger.verbose(
+                    "A socket is being destroyed because the Proxy instance was destroyed.",
+                    {module: __filename});
+                // ...destroy this socket...
                 socket.destroy();
-            });
+            }
+            // ...when the proxy is destroyed.
+            this.once('destroy', onProxyDestroy);
+            // Log the listener count in case we need to look for memory leaks.
+            this.logger.verbose(
+                "Listener count for Proxy 'destroy' event is now: " +
+                EventEmitter.listenerCount(this, 'destroy'), {module: __filename});
+            // But when the socket is closed...
+            socket.once('close', _.bind(function () {
+                // ...we no longer need to worry about closing it when the proxy is destroyed.
+                this.removeListener('destroy', onProxyDestroy);
+                // Log the listener count in case we need to look for memory leaks.
+                this.logger.verbose(
+                    "Listener count for Proxy 'destroy' event is now: " +
+                    EventEmitter.listenerCount(this, 'destroy'),
+                    {module: __filename});
+            }, this));
         }, this));
     // Unhook this event handler when the proxy is destroyed.
     this.once('destroy', function () {

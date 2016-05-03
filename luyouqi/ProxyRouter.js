@@ -8,6 +8,7 @@
 "use strict";
 
 var _ = require('underscore');
+var Logger = require('../log/Logger');
 var EventEmitter = require('events').EventEmitter;
 var express = require('express');
 var inherits = require('util').inherits;
@@ -42,7 +43,8 @@ var ServiceTypes = {
  * @param {ServiceTypes} options.serviceType - This is the type of the service to which requests are forwarded.
  * @param {number} [options.timeout=10*1000] - How long should the proxy wait before timing out a connection?
  * @param {function({}, function(error, response, body)} [options.request=require('request')] - This is the function used to make HTTP(S) requests.
- * @param {Forwarder} [options.forwarder] - This is the forwarder that handles the actual forwarding of requests.
+ * @param {Forwarder} [options.forwarder=new Forwarder()] - This is the forwarder that handles the actual forwarding of requests.
+ * @param {Logger} [options.logger=new Logger()] - This is the logger used by the proxy router.
  * @constructor
  * @see GeocodingProxyRouter
  * @see request
@@ -54,6 +56,7 @@ function ProxyRouter(options) {
         serviceType: null,
         timeout: 10 * 1000,
         forwarder: new Forwarder(),
+        logger: new Logger(),
         methods: ['all']
     }, options));
 
@@ -86,6 +89,13 @@ function ProxyRouter(options) {
      * @private
      */
     this._re.subPath = new RegExp('\\/' + this.serviceType + '\\/?(.*)\\??', 'i'); // TODO: Document this regular expression IN DETAIL!!!
+
+    /**
+     * This is a regular expression pattern (character literal) that can be used to split a sub-path into its parts.
+     * @type {RegExp}
+     * @private
+     */
+    this._re.pathParts = /\//;
 
     /**
      * This is the proxy router's default route path.
@@ -156,18 +166,25 @@ ProxyRouter.prototype.addRoute = function (path) {
  * @param {Request} req - This is the original request.
  * @returns {string} - The method returns the relative path.
  */
-ProxyRouter.prototype.getRelativePath = function (req) {
+ProxyRouter.prototype.getRelativePathInfo = function (req) {
+    // We're going to populate an object with information about the relative path.
+    var relPathInfo = {};
     // Match the request's originalUrl property against the regex that captures the subpath.
     var match = this._re.subPath.exec(req.originalUrl);
     // If we found a match...
     if (match) {
-        // ...return it.
-        return match[1];
+        // ...it's the path.
+        relPathInfo.path = match[1];
+        // Also, chop the path up into its constituent pieces.
+        relPathInfo.parts = match[1].split(this._re.pathParts);
     }
     else {
-        // TODO: Throw an error.
-        console.error('no match!');
+        throw {
+            message: "The original URL did not match the sub-path pattern."
+        };
     }
+    // Return the object containing all that relative path information.
+    return relPathInfo;
 }
 
 /**
@@ -180,7 +197,7 @@ ProxyRouter.prototype.getRelativePath = function (req) {
 ProxyRouter.prototype.onInject = function (req, res, next) {
     // Get the relative path from request (a service of this class) and add it to the request object so that other
     // handlers can use it if they need to.
-    req.relativePath = this.getRelativePath(req);
+    req.relativePathInfo = this.getRelativePathInfo(req);
     next();
 }
 
@@ -193,7 +210,7 @@ ProxyRouter.prototype.onInject = function (req, res, next) {
  */
 ProxyRouter.prototype.onRequest = function (req, res, next) {
     // To where are we forwarding this request?
-    var to = url.resolve(this.serviceUrl, req.relativePath);
+    var to = url.resolve(this.serviceUrl, req.relativePathInfo.path);
     // Now that we know where's it's going, let the forwarder take it from here.
     this.forwarder.autoForward(req, to, function (err, res, body) {
         // When the forwarder is finished, we need to move on to the next handler.
