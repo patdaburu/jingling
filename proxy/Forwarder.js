@@ -1,7 +1,7 @@
 /**
  * ProxyRouter
- * @module luyouqi/Forwarder
- * @see module:luyouqi/Forward
+ * @module proxy/Forwarder
+ * @see module:proxy/Forward
  *
  * Created by patdaburu on 4/28/2016.
  */

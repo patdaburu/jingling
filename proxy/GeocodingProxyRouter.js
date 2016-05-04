@@ -1,7 +1,7 @@
 /**
  * GeocodingProxyRouter
- * @module luyouqi/GeocodingProxyRouter
- * @see module:luyouqi/ProxyRouter
+ * @module proxy/GeocodingProxyRouter
+ * @see module:proxy/ProxyRouter
  * 
  * Created by patdaburu on 4/23/2016.
  */

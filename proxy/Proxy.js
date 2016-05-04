@@ -1,6 +1,6 @@
 /**
  * Proxy
- * @module luyouqi/Proxy
+ * @module proxy/Proxy
  *
  * Created by patdaburu on 4/23/2016.
  */

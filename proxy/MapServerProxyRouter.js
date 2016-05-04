@@ -1,7 +1,7 @@
 /**
  * MapServerProxyRouter
- * @module luyouqi/MapServerProxyRouter
- * @see module:luyouqi/ProxyRouter
+ * @module proxy/MapServerProxyRouter
+ * @see module:proxy/ProxyRouter
  *
  * Created by patdaburu on 4/23/2016.
  */
@@ -43,7 +43,7 @@ MapServerProxyRouter.prototype.onRequest = function (req, res, next) {
 
     /** BEGIN KITTEN SERVER TEST */
     if (req.relativePathInfo.parts[0] == 'tile' && req.relativePathInfo.parts[1] == '5') {
-        this.logger.debug("A tile was requested: " + this.getRelativePathInfo.parts);
+        this.logger.debug("A kitten tile was requested: " + req.relativePathInfo.parts);
 
         res.sendFile('C:\\tmp\\test_tile.jpg');
         //res.writeHead(200, {'Content-Type': 'image/jpeg'});

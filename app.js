@@ -4,8 +4,8 @@
  */
 "use strict";
 
-var Forwarder = require('./luyouqi/Forwarder');
-var Proxy = require('./luyouqi/Proxy');
+var Forwarder = require('./proxy/Forwarder');
+var Proxy = require('./proxy/Proxy');
 var Logger = require('./log/Logger');
 var WinstonLogger = require('./log/WinstonLogger');
 var util = require('util');

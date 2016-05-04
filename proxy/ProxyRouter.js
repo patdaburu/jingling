@@ -1,7 +1,7 @@
 /**
  * ProxyRouter
- * @module luyouqi/ProxyRouter
- * @see module:luyouqi/ProxyRouter
+ * @module proxy/ProxyRouter
+ * @see module:proxy/ProxyRouter
  *
  * Created by patdaburu on 4/23/2016.
  */

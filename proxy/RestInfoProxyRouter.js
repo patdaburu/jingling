@@ -1,7 +1,7 @@
 /**
  * RestInfoProxyRouter
- * @module luyouqi/RestInfoProxyRouter
- * @see module:luyouqi/ProxyRouter
+ * @module proxy/RestInfoProxyRouter
+ * @see module:proxy/ProxyRouter
  *
  * Created by patdaburu on 4/29/2016.
  */
