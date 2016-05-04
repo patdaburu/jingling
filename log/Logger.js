@@ -37,9 +37,18 @@ var LogLevels = {
      */
     INFO: 4,
     /**
-     * This is the severity level of debugging messages.
+     * This is the severity level of extensive messages that may be of interest to an administrator of the sytem.
      */
-    VERBOSE: 5
+    VERBOSE: 5,
+    /**
+     * This is the severity level of extensive messages that may be of interest not only to administrators, but
+     * developers as well.
+     */
+    DEBUG: 6,
+    /**
+     * This is the severity level of messages that people would need to see only in unusual circumstances.
+     */
+    SILLY: 7
 };
 
 /**
@@ -98,11 +107,8 @@ Logger.prototype.log = function (message, level, options) {
     else if (level <= LogLevels.WARNING) {
         console.warn(message);
     }
-    else if (level <= LogLevels.INFO) {
+    else {
         console.info(message);
-    }
-    else if (level <= LogLevels.VERBOSE) {
-        console.info(message); // TODO: Is there a console.debug() or similiar function that's more appropriate here?
     }
 }
 
@@ -147,13 +153,34 @@ Logger.prototype.info = function (message, options) {
 }
 
 /**
- * Log a verbose (debugging) message.
+ * Log a verbose operational message.
  * @param {String} message This is the message to log.
  * @param {Object} options These are additional options pertinent to the log message.
  * @see LogLevels.VERBOSE
  */
 Logger.prototype.verbose = function (message, options) {
     this._log(message, LogLevels.VERBOSE, options);
+}
+
+/**
+ * Log a deep, deep debugging message.
+ * @param {String} message This is the message to log.
+ * @param {Object} options These are additional options pertinent to the log message.
+ * @see LogLevels.DEBUG
+ */
+Logger.prototype.debug = function (message, options) {
+    this._log(message, LogLevels.DEBUG, options);
+}
+
+/**
+ * Log a message that under all but the most unusual of circumstances, nobody would ever need to see.
+ * @param {String} message This is the message to log.
+ * @param {Object} options These are additional options pertinent to the log message.
+ * @see LogLevels.SILLY
+ * {@link} https://github.com/winstonjs/winston
+ */
+Logger.prototype.silly = function (message, options) {
+    this._log(message, LogLevels.SILLY, options);
 }
 
 module.exports = Logger;

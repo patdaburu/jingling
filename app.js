@@ -4,7 +4,11 @@
  */
 "use strict";
 
+var Forwarder = require('./luyouqi/Forwarder');
 var Proxy = require('./luyouqi/Proxy');
+var Logger = require('./log/Logger');
+var WinstonLogger = require('./log/WinstonLogger');
+var util = require('util');
 
 
 // Handle uncaught exceptions.
@@ -21,8 +25,13 @@ process.on('uncaughtException', function (err) {
 //    this.forwarder.proxy = "http://127.0.0.1:8888";
 
 
-// Create the proxy.
-var proxy = new Proxy();
+/**
+ * Create the Proxy (and the classes that support it).
+ */
+var logger = new WinstonLogger({level: Logger.LogLevels.SILLY}); // This is our logger.
+var forwarder = new Forwarder({logger: logger}); // This is our forwarder.
+// Now create the Proxy itself.
+var proxy = new Proxy({forwarder: forwarder, logger: logger}); // TODO: Normalize logging setup.
 
 
 /** http://people.cs.pitt.edu/~alanjawi/cs449/code/shell/UnixSignals.htm */
@@ -61,4 +70,4 @@ process.on('SIGQUIT', function () {
 });
 
 
-console.log('精灵 Proxy Server is running at http://127.0.0.1:' + proxy.port);
+logger.info(util.format('精灵 Proxy Server is listening on port %d', proxy.port));

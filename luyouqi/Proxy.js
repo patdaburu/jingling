@@ -47,7 +47,7 @@ function Proxy(options) { // TODO: Take single object parameter!
         forwarder: new Forwarder(),
         logger: new Logger()
     }, options));
-
+    
     /** This is the Express application that is the basis of this proxy. */
     this._app = express();
 
@@ -128,27 +128,24 @@ Proxy.prototype.startup = function () {
             // We need a callback that will...
             var onProxyDestroy = function () {
                 // Log...
-                this.logger.verbose(
-                    "A socket is being destroyed because the Proxy instance was destroyed.",
-                    {module: __filename});
+                this.logger.debug("A socket is being destroyed because the Proxy instance was destroyed.");
                 // ...destroy this socket...
                 socket.destroy();
             }
             // ...when the proxy is destroyed.
             this.once('destroy', onProxyDestroy);
             // Log the listener count in case we need to look for memory leaks.
-            this.logger.verbose(
+            this.logger.debug(
                 "Listener count for Proxy 'destroy' event is now: " +
-                EventEmitter.listenerCount(this, 'destroy'), {module: __filename});
+                EventEmitter.listenerCount(this, 'destroy'));
             // But when the socket is closed...
             socket.once('close', _.bind(function () {
                 // ...we no longer need to worry about closing it when the proxy is destroyed.
                 this.removeListener('destroy', onProxyDestroy);
                 // Log the listener count in case we need to look for memory leaks.
-                this.logger.verbose(
+                this.logger.debug(
                     "Listener count for Proxy 'destroy' event is now: " +
-                    EventEmitter.listenerCount(this, 'destroy'),
-                    {module: __filename});
+                    EventEmitter.listenerCount(this, 'destroy'));
             }, this));
         }, this));
     // Unhook this event handler when the proxy is destroyed.

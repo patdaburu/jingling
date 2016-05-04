@@ -42,11 +42,8 @@ inherits(MapServerProxyRouter, ProxyRouter);
 MapServerProxyRouter.prototype.onRequest = function (req, res, next) {
 
     /** BEGIN KITTEN SERVER TEST */
-    if (req.relativePathInfo) {
-        console.log(req.relativePathInfo.parts);
-    }
     if (req.relativePathInfo.parts[0] == 'tile' && req.relativePathInfo.parts[1] == '5') {
-        console.log("They want a tile!");
+        this.logger.debug("A tile was requested: " + this.getRelativePathInfo.parts);
 
         res.sendFile('C:\\tmp\\test_tile.jpg');
         //res.writeHead(200, {'Content-Type': 'image/jpeg'});

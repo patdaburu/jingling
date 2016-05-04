@@ -9,8 +9,10 @@
 
 var _ = require('underscore');
 var devNull = require('dev-null');
+var Logger = require('../log/Logger');
 var request = require('request');
 var url = require('url');
+var util = require('util');
 
 /**
  * Copy all the headers in the source response over to the destination response.
@@ -75,7 +77,8 @@ function Forwarder(options) { // TODO: Take single object parameter!
     // Mix the args with defaults, then with this object.
     _.extend(this, _.extend({
         timeout: 10 * 1000,
-        proxy: null
+        proxy: null,
+        logger: new Logger()
     }, options));
     // If the forwarder has been constructed to use a proxy to forward requests...
     if (this.proxy) {
@@ -96,8 +99,8 @@ function Forwarder(options) { // TODO: Take single object parameter!
  * @see forward
  */
 Forwarder.prototype.autoForward = function (req, to, callback, options) {
-
-    console.log("GEMINI: " + req.originalUrl + "->" + to); // TODO: Remove this logging statement.
+    // Log.
+    this.logger.debug(util.format('Forwarding request: {%s} -> {%s}', req.originalUrl, to));
 
     // We are calling the forward() method and passing the original request's Response object as the write stream
     // so that forward will just pipe whatever returns to it.
