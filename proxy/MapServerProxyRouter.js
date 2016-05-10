@@ -33,6 +33,24 @@ function MapServerProxyRouter(options) {
 inherits(MapServerProxyRouter, ProxyRouter);
 
 /**
+ * This is a standard handler function applied to every route created for this proxy.
+ * @param {Request} req - This is the incoming request.
+ * @param {Response} res - This is the outgoing reponse.
+ * @param {function()} next - Call this function to pass control to the next handler.
+ * @see addRoute
+ */
+MapServerProxyRouter.prototype.onInject = function (req, res, next) {
+    // This is an example of calling the parent constructor, but not moving on to the next router (notice that we
+    // don't pass the "next" function up.
+    this.constructor.super_.prototype.onInject.call(this, req, res);
+    /**
+     * Do additional stuff here.
+     */
+    // Now move on to the next handler.
+    next();
+}
+
+/**
  * This is the standard handler function provided by this class.
  * @param {Request} req - This is the incoming request.
  * @param {Response} res - This is the outgoing reponse.

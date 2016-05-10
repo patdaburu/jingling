@@ -100,8 +100,7 @@ function Forwarder(options) { // TODO: Take single object parameter!
  */
 Forwarder.prototype.autoForward = function (req, to, callback, options) {
     // Log.
-    this.logger.debug(util.format('Forwarding request: {%s} -> {%s}', req.originalUrl, to));
-
+    this.logger.debug(util.format('Auto-forwarding request: {%s} -> {%s}', req.originalUrl, to));
     // We are calling the forward() method and passing the original request's Response object as the write stream
     // so that forward will just pipe whatever returns to it.
     this.forward(req, to, callback, req.res, options);
@@ -118,7 +117,8 @@ Forwarder.prototype.autoForward = function (req, to, callback, options) {
  * @param {Object} [options=undefined] - You can optionally supply options to pass to request() that override those calculated by the forwarder.
  */
 Forwarder.prototype.forward = function (req, to, callback, resStream, options) {
-    // TODO: Log this activity!
+    // Log.
+    this.logger.debug(util.format('Forwarding request: {%s} -> {%s}', req.originalUrl, to));
 
     // Clone the headers from the original request.
     var headers = _.clone(req.headers);

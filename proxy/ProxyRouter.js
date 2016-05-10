@@ -78,24 +78,28 @@ function ProxyRouter(options) {
     /**
      * This is a dictionary of regular expression used by the proxy router.
      * @type {{}}
-     * @private
      */
-    this._re = {};
+    this.re = {};
 
     /**
      * This is a regular expression that captures everything in a request's original URL after the service type, not
      * including the query string.
      * @type {RegExp}
-     * @private
      */
-    this._re.subPath = new RegExp('\\/' + this.serviceType + '\\/?(.*)\\??', 'i'); // TODO: Document this regular expression IN DETAIL!!!
+    this.re.subPath = new RegExp('\\/' + this.serviceType + '\\/?(.*)\\??', 'i'); // TODO: Document this regular expression IN DETAIL!!!
 
     /**
      * This is a regular expression pattern (character literal) that can be used to split a sub-path into its parts.
      * @type {RegExp}
-     * @private
      */
-    this._re.pathParts = /\//;
+    this.re.pathParts = /\//;
+
+    // We now need to construct the regular expression that matches and captures everything before the host,
+    // the host itself, and everything after from a URL.
+    var serviceUrlHost = url.parse(this.serviceUrl).hostname;
+    var serviceUrlHostEscapeDots = serviceUrlHost.replace('.', '\\.');
+    // (https?\:\/\/|^)(services\.arcgisonline\.com)([\/$\?].*)
+    this.re.captureHost = new RegExp('(https?\\:\\/\\/|^)(' + serviceUrlHostEscapeDots + ')([\\/$\\?].*)', 'i'); // TODO: Document this regular expression IN DETAIL!!!
 
     /**
      * This is the proxy router's default route path.
@@ -170,13 +174,13 @@ ProxyRouter.prototype.getRelativePathInfo = function (req) {
     // We're going to populate an object with information about the relative path.
     var relPathInfo = {};
     // Match the request's originalUrl property against the regex that captures the subpath.
-    var match = this._re.subPath.exec(req.originalUrl);
+    var match = this.re.subPath.exec(req.originalUrl);
     // If we found a match...
     if (match) {
         // ...it's the path.
         relPathInfo.path = match[1];
         // Also, chop the path up into its constituent pieces.
-        relPathInfo.parts = match[1].split(this._re.pathParts);
+        relPathInfo.parts = match[1].split(this.re.pathParts);
     }
     else {
         throw {
@@ -198,7 +202,8 @@ ProxyRouter.prototype.onInject = function (req, res, next) {
     // Get the relative path from request (a service of this class) and add it to the request object so that other
     // handlers can use it if they need to.
     req.relativePathInfo = this.getRelativePathInfo(req);
-    next();
+    // If we've been given the next handler, let's call it.
+    next && next();
 }
 
 /**
@@ -213,8 +218,9 @@ ProxyRouter.prototype.onRequest = function (req, res, next) {
     var to = url.resolve(this.serviceUrl, req.relativePathInfo.path);
     // Now that we know where's it's going, let the forwarder take it from here.
     this.forwarder.autoForward(req, to, function (err, res, body) {
-        // When the forwarder is finished, we need to move on to the next handler.
-        next();
+        // When the forwarder is finished, we need to move on to the next handler (assuming a subclass hasn't
+        // opted to deal with that part itself).
+        next && next();
     });
 }
 
