@@ -1,11 +1,9 @@
 /**
- * WinstonLogger
+ * A WinstonLogger uses the {@link https://github.com/winstonjs/winston|winston module} to produce direct logging
+ * output.
+ *
  * @module log/WinstonLogger
  * @see module:log/Logger
- * {@link} https://github.com/winstonjs/winston
- * {@link} http://tostring.it/2014/06/23/advanced-logging-with-nodejs/
- *
- * Created by patdaburu on 5/3/2016.
  */
 "use strict";
 
@@ -15,7 +13,7 @@ var Logger = require('./Logger');
 var winston = require('winston');
 
 /**
- *
+ * Convert a defined logging level to its winston equivalent.
  * @param {Logger.LogLevels} logLevel - This is the enumerated LogLevel value you want to convert to a winston severity.
  * @returns {String} The function returns a winston severity level.
  */
@@ -43,7 +41,11 @@ var ToWinstonSeverity = function (logLevel) {
  * @param {Object} [options] - These are the options that determine the logger's behavior.
  * @param {Array} [options.transports] - These are the winston transports
  * @constructor
- * {@link} https://github.com/winstonjs/winston
+ * @class
+ * @classdesc A WinstonLogger uses the {@link https://github.com/winstonjs/winston|winston module} to produce direct
+ *            logging output.
+ * @see {@link http://tostring.it/2014/06/23/advanced-logging-with-nodejs/|Advanced Logging with Node.js}
+ *
  */
 function WinstonLogger(options) {
     // Let the base class do it's thing.

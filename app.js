@@ -19,17 +19,17 @@ process.on('uncaughtException', function (err) {
 });
 
 /**
- * Note to the future:  If you're debugging through Fiddler, uncomment the lines below.
- */
-//    allowTlsUnauthorized();
-//    this.forwarder.proxy = "http://127.0.0.1:8888";
-
-
-/**
  * Create the Proxy (and the classes that support it).
  */
 var logger = new WinstonLogger({level: Logger.LogLevels.SILLY}); // This is our logger.
 var forwarder = new Forwarder({logger: logger}); // This is our forwarder.
+
+/**
+ * Note to the future:  If you're debugging through Fiddler, uncomment the lines below.
+ */
+//Proxy.allowTlsUnauthorized();
+//forwarder.proxy = "http://127.0.0.1:8888";
+
 // Now create the Proxy itself.
 var proxy = new Proxy({forwarder: forwarder, logger: logger}); // TODO: Normalize logging setup.
 

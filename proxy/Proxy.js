@@ -1,8 +1,6 @@
 /**
  * Proxy
  * @module proxy/Proxy
- *
- * Created by patdaburu on 4/23/2016.
  */
 "use strict";
 
@@ -27,6 +25,8 @@ var allowTlsUnauthorized = function () {
 }
 
 /**
+ * @class
+ * @classdesc A proxy is the host for proxy routers.
  * @param {Object}  [options] - These are the options that define the proxy's behavior.
  * @param {number}  [options.port=3030] - This is the port on which the proxy listens.
  * @param {boolean} [options.autoStart=true] - Should the proxy start listening after it's constructed?
@@ -60,8 +60,8 @@ function Proxy(options) { // TODO: Take single object parameter!
     /**
      * This is an array of all the proxy routers used by this proxy.
      * @readonly
-     * @type {Array}
-     * @see ProxyRouter
+     * @type {ProxyRouter[]}
+     * @see module:ProxyRouter
      */
     this.proxyRouters = [];
 
@@ -90,7 +90,7 @@ Proxy.prototype.setup = function () {
         logger: this.logger
     });
     this._app.use(
-        '/ArcGIS/rest/services/World_Street_Map/',
+        '/ArcGIS/rest/services/Banana/',
         connectTimeout(this.connectTimeout),
         mapServerProxyRouter.getRouter());
     this.proxyRouters.push(mapServerProxyRouter);

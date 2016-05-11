@@ -1,9 +1,6 @@
 /**
  * ProxyRouter
  * @module proxy/ProxyRouter
- * @see module:proxy/ProxyRouter
- *
- * Created by patdaburu on 4/23/2016.
  */
 "use strict";
 
@@ -38,15 +35,19 @@ var ServiceTypes = {
 }
 
 /**
+ * @class
+ * @classdesc This is a base class for classes that know how to perform proxy functions.
  * @param {Object} options - These are the options that define the routing behavior.
  * @param {string} options.serviceUrl - This is the URL of the service to which requests are forwarded.
  * @param {ServiceTypes} options.serviceType - This is the type of the service to which requests are forwarded.
  * @param {number} [options.timeout=10*1000] - How long should the proxy wait before timing out a connection?
- * @param {function({}, function(error, response, body)} [options.request=require('request')] - This is the function used to make HTTP(S) requests.
+ * @param {function({}, function(error, response, body))} [options.request=require('request')] - This is the function used to make HTTP(S) requests.
  * @param {Forwarder} [options.forwarder=new Forwarder()] - This is the forwarder that handles the actual forwarding of requests.
  * @param {Logger} [options.logger=new Logger()] - This is the logger used by the proxy router.
  * @constructor
  * @see GeocodingProxyRouter
+ * @see MapServerProxyRouter
+ * @see RestInfoProxyRouter
  * @see request
  */
 function ProxyRouter(options) {
@@ -76,8 +77,9 @@ function ProxyRouter(options) {
     this._routes = [];
 
     /**
-     * This is a dictionary of regular expression used by the proxy router.
-     * @type {{}}
+     * This is a dictionary of regular expression strings and RegExp objects used by the proxy router.
+     * @type {Object}
+     * @see RegExp
      */
     this.re = {};
 

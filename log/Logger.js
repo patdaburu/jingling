@@ -1,9 +1,7 @@
 /**
- * Logger
+ * A Logger is the base class for different types of loggers that may redirect logging info in different ways.
  * @module log/Logger
- * @see module:log/Logger
- *
- * Created by patdaburu on 5/3/2016.
+ * @see module:log/WinstonLogger
  */
 "use strict";
 
@@ -52,6 +50,9 @@ var LogLevels = {
 };
 
 /**
+ * @class
+ * @classdesc A Logger is the base class for different types of loggers that may redirect logging info in different
+ *            ways.
  * @param {Object}  [options] - These are the options that define the logger's behavior.
  * @param {number}  [options.level=LogLevels.ERROR] - This is the port on which the proxy listens.
  * @param options

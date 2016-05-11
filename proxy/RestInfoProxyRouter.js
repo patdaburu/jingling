@@ -27,15 +27,6 @@ function RestInfoProxyRouter(options) {
             serviceUrl: "http://services.arcgisonline.com/ArcGIS/rest/info/",
             serviceType: ProxyRouter.ServiceTypes.REST_INFO
         }, options));
-
-    /**
-     * This is the hostname parsed from the router's service URL.
-     * @see serviceUrl
-     * @private
-     */
-    this.forwardHostName = url.parse(this.serviceUrl).hostname;
-
-    console.log(this.forwardHostName);
 }
 
 inherits(RestInfoProxyRouter, ProxyRouter);

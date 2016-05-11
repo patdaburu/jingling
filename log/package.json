@@ -4,6 +4,9 @@
   "description": "天才日志",
   "author": "Pat Daburu",
   "main": "index.js",
+  "scripts": {
+    "test:all": "istanbul cover -x *.test.js C:/Users/pblair/AppData/Roaming/npm/node_modules/mocha/bin/_mocha -- -R spec tests/*.test.js"
+  },
   "license": "AML",
   "dependencies": {
     "should": "^8.3.1",
