@@ -39,11 +39,11 @@ inherits(RestInfoProxyRouter, ProxyRouter);
  * @see addRoute
  */
 RestInfoProxyRouter.prototype.onRequest = function (req, res, next) {
-
     // To where are we forwarding this request?
     var to = url.resolve(this.serviceUrl, req.relativePathInfo.path);
     // Now that we know where's it's going, let the forwarder take it from here.
     this.forwarder.forward(req, to, _.bind(function (err, res, body) {
+
         // Now let's try to make some changes to the result returned from the forwarding address...
         try {
             // Parse the body of the response into a JSON object.
@@ -73,7 +73,7 @@ RestInfoProxyRouter.prototype.onRequest = function (req, res, next) {
             req.res.send(result);
         } catch (ex) { // If the response isn't JSON...
             // Log.
-            this.logger.verbose(body);
+            this.logger.verbose(body); // TODO: This leads to weird output.
             req.res.send(body); // ...simply write the body returned to us to the original caller.
         }
         next();

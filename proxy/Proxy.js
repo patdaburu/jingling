@@ -8,6 +8,7 @@ var _ = require('underscore');
 var express = require('express');
 var inherits = require('util').inherits;
 var EventEmitter = require('events').EventEmitter;
+var FeatureServerProxyRouter = require('./FeatureServerProxyRouter');
 var Logger = require('../log/Logger');
 var MapServerProxyRouter = require('./MapServerProxyRouter');
 var RestInfoProxyRouter = require('./RestInfoProxyRouter');
@@ -90,13 +91,14 @@ Proxy.prototype.setup = function () {
         logger: this.logger
     });
     this._app.use(
-        '/ArcGIS/rest/services/Banana/',
+        '/ArcGIS/rest/services/Banana/', /* Note: Don't include MapServer */
         connectTimeout(this.connectTimeout),
         mapServerProxyRouter.getRouter());
     this.proxyRouters.push(mapServerProxyRouter);
 
     // Set up the ArcGIS Server Info proxy.
     var restInfoProxyRouter = new RestInfoProxyRouter({
+        serviceUrl: 'http://pv-installtest6:6080/ArcGIS/rest/info/',
         timeout: this.connectTimeout,
         forwarder: this.forwarder,
         logger: this.logger
@@ -107,6 +109,21 @@ Proxy.prototype.setup = function () {
         restInfoProxyRouter.getRouter()
     );
     this.proxyRouters.push(restInfoProxyRouter);
+
+    // Set up the FeatureServer proxy.
+    var featureServerProxyRouter = new FeatureServerProxyRouter({
+        serviceUrl: 'http://pv-installtest6:6080/arcgis/rest/services/Shoreline_BirdSightings/FeatureServer/',
+        timeout: this.connectTimeout,
+        forwarder: this.forwarder,
+        logger: this.logger
+    });
+    this._app.use(
+        '/ArcGIS/rest/services/Shoreline_BirdSightings/', /* Note: Don't include FeatureServer */
+        connectTimeout(this.connectTimeout),
+        featureServerProxyRouter.getRouter()
+    );
+    this.proxyRouters.push(featureServerProxyRouter);
+
 }
 
 /**

@@ -24,10 +24,10 @@ var ServiceTypes = {
      */
     MAP_SERVER: 'MapServer',
     /**
-     * FeatureServerNotYetImplemented
+     * FeatureServer
      * {@link http://resources.arcgis.com/en/help/main/10.2/index.html#//0154000002w8000000|What is a feature service?}
      */
-    FEATURE_SERVER: 'FeatureServerNotYetImplemented',
+    FEATURE_SERVER: 'FeatureServer',
     /**
      * Info - ArcGIS Server Information
      */
@@ -204,6 +204,12 @@ ProxyRouter.prototype.onInject = function (req, res, next) {
     // Get the relative path from request (a service of this class) and add it to the request object so that other
     // handlers can use it if they need to.
     req.relativePathInfo = this.getRelativePathInfo(req);
+
+    res.setHeader('Access-Control-Allow-Origin', 'http://www.arcgis.com');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Vary', 'Origin');
+
+
     // If we've been given the next handler, let's call it.
     next && next();
 }

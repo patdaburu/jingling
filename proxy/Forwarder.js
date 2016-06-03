@@ -10,9 +10,11 @@
 var _ = require('underscore');
 var devNull = require('dev-null');
 var Logger = require('../log/Logger');
+var Promise = require('promise'); // https://www.npmjs.com/package/promise
 var request = require('request');
 var url = require('url');
 var util = require('util');
+var zlib = require('zlib');
 
 /**
  * Copy all the headers in the source response over to the destination response.
@@ -53,7 +55,7 @@ var NODE_TLS_REJECT_UNAUTHORIZED = 'NODE_TLS_REJECT_UNAUTHORIZED';
 /**
  * Inspect the Node environment to see if it's configured to allow us to forward requests successfully through a
  * proxy.
- * {@link See http://stackoverflow.com/questions/17383351/how-to-capture-http-messages-from-request-node-library-with-fiddler}
+ * {@link http://stackoverflow.com/questions/17383351/how-to-capture-http-messages-from-request-node-library-with-fiddler}
  */
 var proxyEnvCheck = function () {
     // If we're forwarding HTTPS calls to servers with self-signed certificates, there is a property on process.env
@@ -68,12 +70,46 @@ var proxyEnvCheck = function () {
 }
 
 /**
+ * This is a helper method that decodes the body of a response from a forwarding server (if necessary), returning
+ * the body as a string.
+ * @param {Request} fres
+ * @param {Object} fbody
+ * @returns {Promise}
+ * {@link https://www.npmjs.com/package/promise|Promise}
+ * @private
+ */
+var _decode = function (fres, fbody) {
+    // Set up the promise.
+    return new Promise(function (fulfill, reject) {
+        try {
+            // For starters, we need to know the content encoding so we can figure out what we need to do.
+            var encoding = fres.headers['content-encoding'];
+            // If the data returned from the forwarder is gzip'd...
+            if (encoding && encoding.indexOf('gzip') >= 0) {
+                // ...let's have the zlib module unzip it for us.
+                zlib.gunzip(fbody, function (err, unzipped) {
+                    // Convert the unzipped data to a string.
+                    var decoded = unzipped.toString('utf-8');
+                    // We're all good here and we can fulfill the promise.
+                    fulfill(decoded);
+                });
+            } else { // Otherwise, we can just send back the original body data.
+                fulfill(fbody);
+            }
+        }
+        catch (err) { // Ah, but if something goes wrong along the way...
+            reject(err); // ...we'll reject the promise, supplying the error.
+        }
+    });
+}
+
+/**
  * @param {Object} [options] - These are the options that define the forwarding behavior.
  * @param {number} [options.timeout=10*1000] - This is how long a request can linger before it times out.
  * @param {String} [options.proxy=null] - This is the URL of the proxy throw which requests are forwarded.
  * @constructor
  */
-function Forwarder(options) { // TODO: Take single object parameter!
+function Forwarder(options) {
     // Mix the args with defaults, then with this object.
     _.extend(this, _.extend({
         timeout: 10 * 1000,
@@ -108,7 +144,6 @@ Forwarder.prototype.autoForward = function (req, to, callback, options) {
 
 /**
  * Forward an incoming request to another URL.
- *
  * @param {Request} [req] - This is the request you want to forward on.
  * @param {string}  [to] - This is the url to which you want to forward the request.
  * @param {function(err, res, body)} [callback=undefined] - This is the callback called when the request is completed.
@@ -133,7 +168,8 @@ Forwarder.prototype.forward = function (req, to, callback, resStream, options) {
         timeout: this.timeout,
         method: req.method,
         headers: headers,
-        qs: qs
+        qs: qs,
+        encoding: null // TODO: Don't do this here!!! (Do it in RestInfoProxyRouter!)
     };
 
     // If the caller has supplied request options to override the ones we have set...
@@ -153,20 +189,34 @@ Forwarder.prototype.forward = function (req, to, callback, resStream, options) {
 
     // Use the request module to forward the request.
     try {
-        req.pipe(request(_options, function (ferr, fres, fbody) {
-
+        req.pipe(request(_options, _.bind(function (ferr, fres, fbody) {
             // If the request to the forwarding address elicits an error...
             if (ferr) {
-                // TODO: Take action on errors.
-                console.dir(ferr);
+                // Log.
+                this.logger.debug(
+                    util.format(
+                        'Forwarded request to %s returned an error: %s',
+                        to, JSON.stringify(ferr)));
+                // If the caller supplied a callback, send the error.
+                callback && callback(ferr);
             }
-
-            // If the caller supplied a callback...
+            // If the caller provided a callback method...
             if (callback) {
-                // ...call it now!
-                callback(ferr, fres, fbody);
+                // ...let's decode the body under the presumption that the caller wants it in a predictable string
+                // form.
+                _decode(fres, fbody).then(
+                    // If the decoding succeeds...
+                    function (fbody_decoded) {
+                        // ...we can now pass along the callback.
+                        callback(ferr, fres, fbody_decoded);
+                    },
+                    // Otherwise, we have a problem, which we should also pass back to the callback.
+                    function (err) {
+                        callback(err);
+                    }
+                );
             }
-        })).pipe(_resStream);
+        }, this))).pipe(_resStream); // Pipe whatever is returned to the stream provided.
     }
     catch (err) { // If something went wrong with the request...
         // TODO: Log this!
