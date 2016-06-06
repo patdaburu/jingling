@@ -5,6 +5,7 @@
 "use strict";
 
 var _ = require('underscore');
+var AuthMiddleware = require('../auth/AuthMiddleware');
 var express = require('express');
 var inherits = require('util').inherits;
 var EventEmitter = require('events').EventEmitter;
@@ -38,7 +39,7 @@ var allowTlsUnauthorized = function () {
  * @param {Logger} [options.forwarder=undefined] - This is the logger used by the proxy.
  * @constructor
  */
-function Proxy(options) { // TODO: Take single object parameter!
+function Proxy(options) {
     // Mix the args with defaults, then with this object.
     _.extend(this, _.extend({
         port: 3030,
@@ -83,6 +84,17 @@ inherits(Proxy, EventEmitter);
  * @see {@link startup}
  */
 Proxy.prototype.setup = function () {
+
+
+
+    // Set up the 'Auth' Middleware.
+    var amw = new AuthMiddleware();
+//    this._app.use('/theonion', amw.getHandler());
+    this._app.use(
+        '/',
+        connectTimeout(this.connectTimeout),
+        amw.getRouter());
+
 
     // Set up the MapServer proxy.
     var mapServerProxyRouter = new MapServerProxyRouter({

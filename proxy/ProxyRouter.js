@@ -1,6 +1,7 @@
 /**
  * ProxyRouter
  * @module proxy/ProxyRouter
+ * {@link http://expressjs.com/en/guide/routing.html|Express Routing}
  */
 "use strict";
 
@@ -11,6 +12,7 @@ var express = require('express');
 var inherits = require('util').inherits;
 var Forwarder = require('./Forwarder');
 var url = require('url');
+var util = require('util');
 
 /**
  * These are the defined web service types.
@@ -113,17 +115,20 @@ function ProxyRouter(options) {
 
     // Let's make sure we have a service type.
     if (!this.serviceType) {
-        console.warn("No service type is specified!") // TODO: Log this properly.
+        // Log the fact if we don't.
+        this.logger.error(util.format('%s does not specify a service type!', this.constructor.name));
     }
 
     // Let's make sure we have a service URL.
     if (!this.serviceUrl) {
-        console.warn("No service URL is specified!"); // TODO: Log this properly.
+        // Log the fact if we don't.
+        this.logger.error(util.format('%s does not specify URL!', this.constructor.name));
     }
 
     // If the caller didn't specify any HTTP methods to handle...
     if (!this.methods) {
-        console.warn("No methods were specified!"); // TODO: Log this properly.
+        // Log this!
+        this.logger.warn(util.format('%s specifies no HTTP methods to handle!', this.constructor.name));
     } else { // Otherwise, let's set up the handlers!
         // Iterate over all the known HTTP methods.
         _.each(['get', 'post', 'put', 'delete', 'all'], function (method) {
@@ -141,8 +146,10 @@ function ProxyRouter(options) {
 inherits(ProxyRouter, EventEmitter);
 
 /**
- * Get this proxy router's Express/Connect router.
+ * Get this proxy router's Express/Connect router. "A Router instance is a complete middleware and routing system;
+ * for this reason, it is often referred to as a 'mini-app'."
  * @returns {Router}
+ * {@link http://expressjs.com/en/guide/routing.html|Express Routing}
  */
 ProxyRouter.prototype.getRouter = function () {
     return this._router;
@@ -205,7 +212,7 @@ ProxyRouter.prototype.onInject = function (req, res, next) {
     // handlers can use it if they need to.
     req.relativePathInfo = this.getRelativePathInfo(req);
 
-    res.setHeader('Access-Control-Allow-Origin', 'http://www.arcgis.com');
+    res.setHeader('Access-Control-Allow-Origin', 'http://www.arcgis.com'); // TODO: We have to deal with this.  It's necessary for the ESRI tools.
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Vary', 'Origin');
 

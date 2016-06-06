@@ -20,11 +20,6 @@ describe('Logger', function () {
         });
         // Constructor options are provided.
         describe('with options', function () {
-            if (1 == 1) {
-                var x = 1;
-            } else {
-                var x = 2;
-            }
             // Iterate over the enumerated logging levels.
             for (var logLevel in Logger.LogLevels) {
                 // Get the actual value for this level.
@@ -45,42 +40,42 @@ describe('Logger', function () {
         // Method tests.
         describe('write()', function () {
             it('should write.', function () {
-                sillyLogger.write('nothing');
+                sillyLogger.write('foo');
             });
         });
         describe('critical()', function () {
             it('should log a critical.', function () {
-                sillyLogger.critical('nothing');
+                sillyLogger.critical('foo');
             });
         });
         describe('error()', function () {
             it('should log an error.', function () {
-                sillyLogger.error('nothing');
+                sillyLogger.error('foo');
             });
         });
         describe('warning()', function () {
             it('should log a warning.', function () {
-                sillyLogger.warning('nothing');
+                sillyLogger.warning('foo');
             });
         });
         describe('info()', function () {
             it('should log info.', function () {
-                sillyLogger.info('nothing');
+                sillyLogger.info('foo');
             });
         });
         describe('verbose()', function () {
             it('should log verbose.', function () {
-                sillyLogger.verbose('nothing');
+                sillyLogger.verbose('foo');
             });
         });
         describe('debug()', function () {
             it('should log debugging info.', function () {
-                sillyLogger.debug('nothing');
+                sillyLogger.debug('foo');
             });
         });
         describe('silly()', function () {
             it('should log silly.', function () {
-                sillyLogger.silly('nothing');
+                sillyLogger.silly('foo');
             });
         });
     });
