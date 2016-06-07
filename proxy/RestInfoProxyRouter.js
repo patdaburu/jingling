@@ -17,6 +17,9 @@ var util = require('util');
  * @param {Object} [options] - These are the options that define the routing behavior.
  * @param {number} [options.defaultPath=/] - This is the path on which the default router is mounted.
  * @param {string} [options.serviceUrl] - This is the URL of the service to which requests are forwarded.
+ * @param {Forwarder} [options.forwarder=new Forwarder()] - This is the forwarder that handles the actual forwarding of
+ *                                                          requests.
+ * @param {Logger} [options.logger=new Logger()] - This is the logger used by the proxy router.
  * @constructor
  * @extends ProxyRouter
  */

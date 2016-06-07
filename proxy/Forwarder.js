@@ -53,23 +53,6 @@ var extendResHeaders = function (destination, source) {
 var NODE_TLS_REJECT_UNAUTHORIZED = 'NODE_TLS_REJECT_UNAUTHORIZED';
 
 /**
- * Inspect the Node environment to see if it's configured to allow us to forward requests successfully through a
- * proxy.
- * {@link http://stackoverflow.com/questions/17383351/how-to-capture-http-messages-from-request-node-library-with-fiddler}
- */
-var proxyEnvCheck = function () {
-    // If we're forwarding HTTPS calls to servers with self-signed certificates, there is a property on process.env
-    // that must be set for it to work properly.
-    if (process.env[NODE_TLS_REJECT_UNAUTHORIZED] != '0') {
-        // TODO: Log this, or warn properly.
-        var tlsRejectUnauthPropertyName = "process.env." + NODE_TLS_REJECT_UNAUTHORIZED;
-        console.warn(tlsRejectUnauthPropertyName + " = " + process.env[NODE_TLS_REJECT_UNAUTHORIZED]);
-        console.warn("If you are forwarding calls to services with self-signed certificates, set the value of " +
-            tlsRejectUnauthPropertyName + " to '0' or call Proxy.tlsAllowUnauthorized().");
-    }
-}
-
-/**
  * This is a helper method that decodes the body of a response from a forwarding server (if necessary), returning
  * the body as a string.
  * @param {Request} fres
@@ -106,20 +89,48 @@ var _decode = function (fres, fbody) {
 /**
  * @param {Object} [options] - These are the options that define the forwarding behavior.
  * @param {number} [options.timeout=10*1000] - This is how long a request can linger before it times out.
- * @param {String} [options.proxy=null] - This is the URL of the proxy throw which requests are forwarded.
+ * @param {string} [options.proxy=null] - This is the URL of the proxy through which requests are forwarded.
+ * @param {Logger} [options.logger=new Logger()] - This is the Logger object to which the object may write its logging
+ *                                                 output.
  * @constructor
  */
 function Forwarder(options) {
+
+    /**
+     * This is how long a request can linger before it times out.
+     * @type {number}
+     */
+    this.timeout = undefined;
+
+    /**
+     * This is the URL of the proxy through which requests are forwarded.
+     * @type {string}
+     */
+    this.proxy = undefined;
+
+    /**
+     * This is the logger object
+     * @type {Logger}
+     */
+    this.logger = undefined;
+
     // Mix the args with defaults, then with this object.
     _.extend(this, _.extend({
         timeout: 10 * 1000,
         proxy: null,
         logger: new Logger()
     }, options));
-    // If the forwarder has been constructed to use a proxy to forward requests...
-    if (this.proxy) {
-        // ...we should perform a few checks.
-        proxyEnvCheck();
+
+    // If the forwarder has been constructed to use a proxy to forward requests and we're forwarding HTTPS calls to
+    // servers with self-signed certificates, there is a property on process.env that must be set for it to work
+    // properly...
+    if (this.proxy && process.env[NODE_TLS_REJECT_UNAUTHORIZED] != '0') {
+        // ...we should let the peoples know the deal.
+        var tlsRejectUnauthPropertyName = "process.env." + NODE_TLS_REJECT_UNAUTHORIZED;
+        this.logger.warn(tlsRejectUnauthPropertyName + " = " + process.env[NODE_TLS_REJECT_UNAUTHORIZED]);
+        this.logger.warn(
+            "If you are forwarding calls to services with self-signed certificates, set the value of " +
+            tlsRejectUnauthPropertyName + " to '0' or call Proxy.tlsAllowUnauthorized().");
     }
 }
 

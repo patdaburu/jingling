@@ -32,7 +32,8 @@ var allowTlsUnauthorized = function () {
  * @param {Object}  [options] - These are the options that define the proxy's behavior.
  * @param {number}  [options.port=3030] - This is the port on which the proxy listens.
  * @param {boolean} [options.autoStart=true] - Should the proxy start listening after it's constructed?
- * @param {number}  [options.connectTimeout=10*1000] - This is the time after which connections time out.
+ * @param {number}  [options.connectTimeout=10*1000] - This is the period (in milliseconds) after which connections time
+ *                                                     out.
  * @param {number}  [options.keepAlive=30*1000] - This is how long a connection socket can remain open.
  * @param {Forwarder} [options.forwarder=undefined] - This is the Forwarder instance used by proxy routers to forward
  *                                                    requests.
@@ -40,6 +41,41 @@ var allowTlsUnauthorized = function () {
  * @constructor
  */
 function Proxy(options) {
+    /**
+     * Note: We declare but do not define some of the private properties to help out the IDEs that become confused
+     * in the absence of such declarations.
+     */
+    
+    /**
+     * This is the period (in milliseconds) after which connections time out.
+     * @type {number}
+     */
+    this.connectTimeout = undefined;
+
+    /**
+     * Should the proxy start listening after it's constructed? (Or, was it instructed to do so at construction?)
+     * @type {boolean}
+     */
+    this.autoStart = undefined;
+
+    /**
+     * This is how long (in milliseconds) a connection socket can remain open.
+     * @type {number}
+     */
+    this.keepAlive = undefined;
+
+    /**
+     * This is the forwarder used by the proxy.
+     * @type {Forwarder}
+     */
+    this.forwarder = undefined;
+
+    /**
+     * This is the logger used by the proxy.
+     * @type {Logger}
+     */
+    this.logger = undefined;
+
     // Mix the args with defaults, then with this object.
     _.extend(this, _.extend({
         port: 3030,
@@ -85,16 +121,12 @@ inherits(Proxy, EventEmitter);
  */
 Proxy.prototype.setup = function () {
 
-
-
     // Set up the 'Auth' Middleware.
-    var amw = new AuthMiddleware();
-//    this._app.use('/theonion', amw.getHandler());
+    /*    var amw = new AuthMiddleware();
     this._app.use(
         '/',
         connectTimeout(this.connectTimeout),
-        amw.getRouter());
-
+     amw.getRouter());*/
 
     // Set up the MapServer proxy.
     var mapServerProxyRouter = new MapServerProxyRouter({
@@ -130,7 +162,7 @@ Proxy.prototype.setup = function () {
         logger: this.logger
     });
     this._app.use(
-        '/ArcGIS/rest/services/Shoreline_BirdSightings/', /* Note: Don't include FeatureServer */
+        '/ArcGIS/rest/services/Pineapple/Shoreline_BirdSightings/', /* Note: Don't include FeatureServer */
         connectTimeout(this.connectTimeout),
         featureServerProxyRouter.getRouter()
     );
