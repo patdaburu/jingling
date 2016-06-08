@@ -1,7 +1,7 @@
 /**
- * RestInfoProxyRouter
- * @module proxy/RestInfoProxyRouter
- * @see module:proxy/ProxyRouter
+ * RestInfoProxyMiddleware
+ * @module proxy/RestInfoProxyMiddleware
+ * @see module:proxy/ProxyMiddleware
  *
  * Created by patdaburu on 4/29/2016.
  */
@@ -9,7 +9,7 @@
 
 var _ = require('underscore');
 var inherits = require('util').inherits;
-var ProxyRouter = require('./ProxyRouter'); // http://blog.modulus.io/node.js-tutorial-how-to-use-request-module
+var ProxyMiddleware = require('./ProxyMiddleware'); // http://blog.modulus.io/node.js-tutorial-how-to-use-request-module
 var url = require('url');
 var util = require('util');
 
@@ -21,18 +21,18 @@ var util = require('util');
  *                                                          requests.
  * @param {Logger} [options.logger=new Logger()] - This is the logger used by the proxy router.
  * @constructor
- * @extends ProxyRouter
+ * @extends ProxyMiddleware
  */
-function RestInfoProxyRouter(options) {
-    ProxyRouter.call(this,
+function RestInfoProxyMiddleware(options) {
+    ProxyMiddleware.call(this,
         _.extend({ // Mix in the default arguments before passing the arguments to the parent.
             defaultPath: '/',
             serviceUrl: "http://services.arcgisonline.com/ArcGIS/rest/info/",
-            serviceType: ProxyRouter.ServiceTypes.REST_INFO
+            serviceType: ProxyMiddleware.ServiceTypes.REST_INFO
         }, options));
 }
 
-inherits(RestInfoProxyRouter, ProxyRouter);
+inherits(RestInfoProxyMiddleware, ProxyMiddleware);
 
 /**
  * This is the standard handler function provided by this class.
@@ -41,7 +41,7 @@ inherits(RestInfoProxyRouter, ProxyRouter);
  * @param {function()} next - Call this function to pass control to the next handler.
  * @see addRoute
  */
-RestInfoProxyRouter.prototype.onRequest = function (req, res, next) {
+RestInfoProxyMiddleware.prototype.onRequest = function (req, res, next) {
     // To where are we forwarding this request?
     var to = url.resolve(this.serviceUrl, req.relativePathInfo.path);
     // Now that we know where's it's going, let the forwarder take it from here.
@@ -83,4 +83,4 @@ RestInfoProxyRouter.prototype.onRequest = function (req, res, next) {
     }, this));
 }
 
-module.exports = RestInfoProxyRouter;
+module.exports = RestInfoProxyMiddleware;

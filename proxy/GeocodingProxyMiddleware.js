@@ -14,16 +14,16 @@
 var _ = require('underscore');
 var inherits = require('util').inherits;
 var request = require('request');
-var ProxyRouter = require('./ProxyRouter');
+var ProxyMiddleware = require('./ProxyMiddleware');
 
 /**
  * @param {Object} [args] - These are the options that define the routing behavior.
  * @param {number} [args.defaultPath=/] - This is the path on which the default router is mounted.
  * @constructor
- * @extends ProxyRouter
+ * @extends ProxyMiddleware
  */
-function GeocodingServiceRouter(args) {
-    ProxyRouter.call(this,
+function GeocodingServiceMiddleware(args) {
+    ProxyMiddleware.call(this,
         _.extend({ // Mix in the default arguments before passing the arguments to the parent.
             defaultPath: '/geocode'
         }, args));
@@ -34,12 +34,12 @@ function GeocodingServiceRouter(args) {
 
 }
 
-inherits(GeocodingServiceRouter, ProxyRouter);
+inherits(GeocodingServiceMiddleware, ProxyMiddleware);
 
-/*GeocodingServiceRouter.prototype.init = function(){
+/*GeocodingServiceMiddleware.prototype.init = function(){
  // Call the parent class' implementation.
  console.log("in the sub class");
- GeocodingServiceRouter.super_.prototype._init.call(this, route);
+ GeocodingServiceMiddleware.super_.prototype._init.call(this, route);
  console.log("in the sub class again");
 
  var defaultRoute = this.getDefaultRoute();
@@ -48,7 +48,7 @@ inherits(GeocodingServiceRouter, ProxyRouter);
  }*/
 
 
-GeocodingServiceRouter.prototype.onGet = function (req, res, next) {
+GeocodingServiceMiddleware.prototype.onGet = function (req, res, next) {
     //res.send('thanks for the GET (geocoder) SRSLY!!');
     console.log("We'll try to GET!");
 
@@ -71,16 +71,16 @@ GeocodingServiceRouter.prototype.onGet = function (req, res, next) {
     });
 }
 
-GeocodingServiceRouter.prototype.onPost = function (req, res, next) {
+GeocodingServiceMiddleware.prototype.onPost = function (req, res, next) {
     res.send('thanks for the POST (geocoder)');
 }
 
-/*GeocodingServiceRouter.prototype.onPut = function(req, res, next){
+/*GeocodingServiceMiddleware.prototype.onPut = function(req, res, next){
  res.send('thanks for the PUT (geocoder)');
  }
 
- GeocodingServiceRouter.prototype.onDelete = function(req, res, next){
+ GeocodingServiceMiddleware.prototype.onDelete = function(req, res, next){
  res.send('thanks for the DELETE (geocoder)');
  }*/
 
-module.exports = GeocodingServiceRouter;
+module.exports = GeocodingServiceMiddleware;

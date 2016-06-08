@@ -9,10 +9,10 @@ var AuthMiddleware = require('../auth/AuthMiddleware');
 var express = require('express');
 var inherits = require('util').inherits;
 var EventEmitter = require('events').EventEmitter;
-var FeatureServerProxyRouter = require('./FeatureServerProxyRouter');
+var FeatureServerProxyMiddleware = require('./FeatureServerProxyMiddleware');
 var Logger = require('../log/Logger');
-var MapServerProxyRouter = require('./MapServerProxyRouter');
-var RestInfoProxyRouter = require('./RestInfoProxyRouter');
+var MapServerProxyMiddleware = require('./MapServerProxyMiddleware');
+var RestInfoProxyMiddleware = require('./RestInfoProxyMiddleware');
 var Forwarder = require('./Forwarder');
 var connectTimeout = require('connect-timeout');
 var url = require('url');
@@ -98,7 +98,7 @@ function Proxy(options) {
     /**
      * This is an array of all the proxy routers used by this proxy.
      * @readonly
-     * @type {ProxyRouter[]}
+     * @type {ProxyMiddleware[]}
      * @see module:ProxyRouter
      */
     this.proxyRouters = [];
@@ -129,7 +129,7 @@ Proxy.prototype.setup = function () {
      amw.getRouter());*/
 
     // Set up the MapServer proxy.
-    var mapServerProxyRouter = new MapServerProxyRouter({
+    var mapServerProxyRouter = new MapServerProxyMiddleware({
         timeout: this.connectTimeout,
         forwarder: this.forwarder,
         logger: this.logger
@@ -141,7 +141,7 @@ Proxy.prototype.setup = function () {
     this.proxyRouters.push(mapServerProxyRouter);
 
     // Set up the ArcGIS Server Info proxy.
-    var restInfoProxyRouter = new RestInfoProxyRouter({
+    var restInfoProxyRouter = new RestInfoProxyMiddleware({
         serviceUrl: 'http://pv-installtest6:6080/ArcGIS/rest/info/',
         timeout: this.connectTimeout,
         forwarder: this.forwarder,
@@ -155,7 +155,7 @@ Proxy.prototype.setup = function () {
     this.proxyRouters.push(restInfoProxyRouter);
 
     // Set up the FeatureServer proxy.
-    var featureServerProxyRouter = new FeatureServerProxyRouter({
+    var featureServerProxyRouter = new FeatureServerProxyMiddleware({
         serviceUrl: 'http://pv-installtest6:6080/arcgis/rest/services/Shoreline_BirdSightings/FeatureServer/',
         timeout: this.connectTimeout,
         forwarder: this.forwarder,

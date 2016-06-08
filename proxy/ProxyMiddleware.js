@@ -1,6 +1,6 @@
 /**
- * ProxyRouter
- * @module proxy/ProxyRouter
+ * ProxyMiddleware
+ * @module proxy/ProxyMiddleware
  * {@link http://expressjs.com/en/guide/routing.html|Express Routing}
  */
 "use strict";
@@ -48,8 +48,8 @@ var ServiceTypes = {
  * @param {Logger} [options.logger=new Logger()] - This is the logger used by the proxy router.
  * @constructor
  * @see GeocodingProxyRouter
- * @see MapServerProxyRouter
- * @see RestInfoProxyRouter
+ * @see MapServerProxyMiddleware
+ * @see RestInfoProxyMiddleware
  * @see request
  */
 function ProxyRouter(options) {

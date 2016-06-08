@@ -180,7 +180,7 @@ Forwarder.prototype.forward = function (req, to, callback, resStream, options) {
         method: req.method,
         headers: headers,
         qs: qs,
-        encoding: null // TODO: Don't do this here!!! (Do it in RestInfoProxyRouter!)
+        encoding: null // TODO: Don't do this here!!! (Do it in RestInfoProxyMiddleware!)
     };
 
     // If the caller has supplied request options to override the ones we have set...
